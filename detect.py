@@ -181,12 +181,13 @@ def detect_dataset(model, device, test_img_path, submit_path):
 
 
 if __name__ == '__main__':
-	img_path    = '../ICDAR_2015/test_img/img_2.jpg'
-	model_path  = './pths/east_vgg16.pth'
+	img_path    = '../ICDAR_2015/test_img/test.jpg'
+	model_path  = './pths/east.pth'
 	res_img     = './res.bmp'
 	device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 	model = EAST().to(device)
-	model.load_state_dict(torch.load(model_path))
+	checkpoint = torch.load(model_path)
+	model.load_state_dict(checkpoint["model_state_dict"])
 	model.eval()
 	img = Image.open(img_path)
 	
