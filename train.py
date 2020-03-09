@@ -92,9 +92,10 @@ def train(train_img_path, train_gt_path, pths_path, batch_size, lr, num_workers,
 		print(time.asctime(time.localtime(time.time())))
 		print('='*50)
 		if (epoch + 1) % interval == 0:
+			model_state_dict = model.module.state_dict() if data_parallel else model.state_dict()
 			torch.save({
 				'epoch': total_epoch + epoch + 1,
-				'model_state_dict': model.state_dict(),
+				'model_state_dict': model_state_dict,
 				'optimizer_state_dict': optimizer.state_dict(),
 				'epoch_loss': epoch_dict,
 				'test_loss': test_dict
