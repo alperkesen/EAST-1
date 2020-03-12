@@ -41,11 +41,15 @@ def train(train_img_path, train_gt_path, pths_path, batch_size, lr, num_workers,
 		epoch_dict = checkpoint['epoch_loss']
 		test_dict = checkpoint['test_loss']
 		total_epoch = checkpoint['epoch']
+		best_loss = checkpoint['best_loss']
+		best_accuracy = checkpoint['best_accuracy']
         except FileNotFoundError:
 		model.load_state_dict(torch.load('./pths/east_vgg16.pth'))
 		epoch_dict = dict()
 		test_dict = dict()
 		total_epoch = 0
+		best_loss = float('inf')
+		best_accuracy = 0
 
 	print("Continue from epoch {}".format(total_epoch))
 	print("Epoch_dict", epoch_dict)
@@ -99,8 +103,34 @@ def train(train_img_path, train_gt_path, pths_path, batch_size, lr, num_workers,
 				'model_state_dict': model_state_dict,
 				'optimizer_state_dict': optimizer.state_dict(),
 				'epoch_loss': epoch_dict,
-				'test_loss': test_dict
+				'test_loss': test_dict,
+				'best_loss': best_loss,
+				'best_acc': best_acc
       }, os.path.join(pths_path, 'east.pth'))
+
+		if (total_epoch + epoch + 1) % 10 == 0:
+			model_state_dict = model.module.state_dict() if data_parallel else model.state_dict()
+			torch.save({
+				'epoch': total_epoch + epoch + 1,
+				'model_state_dict': model_state_dict,
+				'optimizer_state_dict': optimizer.state_dict(),
+				'epoch_loss': epoch_dict,
+				'test_loss': test_dict,
+				'best_loss': best_loss,
+				'best_acc': best_acc
+      }, os.path.join(pths_path, 'east_epoch_{}.pth'.format(total_epoch + epoch + 1))
+
+		if test_loss / int(file_num2/batch_size) < best_loss:
+			model_state_dict = model.module.state_dict() if data_parallel else model.state_dict()
+			torch.save({
+				'epoch': total_epoch + epoch + 1,
+				'model_state_dict': model_state_dict,
+				'optimizer_state_dict': optimizer.state_dict(),
+				'epoch_loss': epoch_dict,
+				'test_loss': test_dict,
+				'best_loss': best_loss,
+				'best_acc': best_acc
+      }, os.path.join(pths_path, 'east_best_loss.pth'))
 
 
 if __name__ == '__main__':
