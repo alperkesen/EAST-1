@@ -32,25 +32,25 @@ def train(train_img_path, train_gt_path, pths_path, batch_size, lr, num_workers,
 		model = nn.DataParallel(model)
 		data_parallel = True
 	model.to(device)
-
-	checkpoint = torch.load('./pths/east.pth')
-	model.load_state_dict(checkpoint['model_state_dict'])
-
 	optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-	optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-	epoch_dict = checkpoint['epoch_loss']
-	test_dict = checkpoint['test_loss']
-	total_epoch = checkpoint['epoch']
+
+	try:
+		checkpoint = torch.load('./pths/east.pth')
+		model.load_state_dict(checkpoint['model_state_dict'])
+		optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+		epoch_dict = checkpoint['epoch_loss']
+		test_dict = checkpoint['test_loss']
+		total_epoch = checkpoint['epoch']
+        except FileNotFoundError:
+		model.load_state_dict(torch.load('./pths/east_vgg16.pth'))
+		epoch_dict = dict()
+		test_dict = dict()
+		total_epoch = 0
+
 	print("Continue from epoch {}".format(total_epoch))
 	print("Epoch_dict", epoch_dict)
 	print("Test_dict", test_dict)
 	scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[epoch_iter//2], gamma=0.1)
-
-	train_err_file = open('errors.txt', 'w')
-	train_err_file.write("Epoch, Epoch_Loss\n")
-
-	test_err_file = open('test_errors.txt', 'w')
-	test_err_file.write("Epoch, Epoch_Loss\n")
 
 	for epoch in range(epoch_iter):	
 		model.train()
@@ -63,7 +63,9 @@ def train(train_img_path, train_gt_path, pths_path, batch_size, lr, num_workers,
 			img, gt_score, gt_geo, ignored_map = img.to(device), gt_score.to(device), gt_geo.to(device), ignored_map.to(device)
 			pred_score, pred_geo = model(img)
 			loss = criterion(gt_score, pred_score, gt_geo, pred_geo, ignored_map)
-			print('GT Score: {}, Pred Score: {}, GT Geo: {}, Ignored Map: {}'.format(gt_score, pred_score, gt_geo, pred_geo))
+
+			print(' (train) GT Score: {}, Pred Score: {}, GT Geo: {}, Ignored Map: {}'.format(gt_score, pred_score, gt_geo, pred_geo))
+
 			epoch_loss += loss.item()
 			optimizer.zero_grad()
 			loss.backward()
@@ -73,7 +75,6 @@ def train(train_img_path, train_gt_path, pths_path, batch_size, lr, num_workers,
               epoch+1, epoch_iter, i+1, int(file_num/batch_size), time.time()-start_time, loss.item()))
 
 		epoch_dict[total_epoch + epoch + 1] = (epoch_loss / int(file_num / batch_size), epoch_loss)
-		train_err_file.write("{},{:.8f},{}\n".format(epoch+1, epoch_loss / int(file_num / batch_size), epoch_loss))
 		print('epoch_loss is {:.8f}, epoch_time is {:.8f}, epoch_loss: {}'.format(epoch_loss / int(file_num/batch_size), time.time()-epoch_time, epoch_loss))
 
 		with torch.no_grad():
@@ -81,13 +82,12 @@ def train(train_img_path, train_gt_path, pths_path, batch_size, lr, num_workers,
 				img, gt_score, gt_geo, ignored_map = img.to(device), gt_score.to(device), gt_geo.to(device), ignored_map.to(device)
 				pred_score, pred_geo = model(img)
 				loss = criterion(gt_score, pred_score, gt_geo, pred_geo, ignored_map)
-				print('GT Score: {}, Pred Score: {}, GT Geo: {}, Ignored Map: {}'.format(gt_score, pred_score, gt_geo, pred_geo))
+				print('(val) GT Score: {}, Pred Score: {}, GT Geo: {}, Ignored Map: {}'.format(gt_score, pred_score, gt_geo, pred_geo))
 				test_loss += loss.item()
 				print('Epoch (test) is [{}/{}], mini-batch is [{}/{}], time consumption is {:.8f}, batch_loss is {:.8f}'.format(\
               epoch+1, epoch_iter, i+1, int(file_num2/batch_size), time.time()-start_time, loss.item()))
 
 		test_dict[total_epoch + epoch + 1] = (test_loss / int(file_num / batch_size), test_loss)
-		test_err_file.write("{},{:.8f},{}\n".format(epoch+1, test_loss / int(file_num2 / batch_size), test_loss))
 		print('test_loss is {:.8f}, epoch_time is {:.8f}, test_loss: {}'.format(test_loss / int(file_num2/batch_size), time.time()-epoch_time, test_loss))
 
 		print(time.asctime(time.localtime(time.time())))
@@ -110,7 +110,7 @@ if __name__ == '__main__':
 	batch_size     = 16
 	lr             = 1e-3
 	num_workers    = 4
-	epoch_iter     = 1
+	epoch_iter     = 2
 	save_interval  = 1
 	train(train_img_path, train_gt_path, pths_path, batch_size, lr, num_workers, epoch_iter, save_interval)	
 	
