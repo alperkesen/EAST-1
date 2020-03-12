@@ -63,7 +63,7 @@ def train(train_img_path, train_gt_path, pths_path, batch_size, lr, num_workers,
 			img, gt_score, gt_geo, ignored_map = img.to(device), gt_score.to(device), gt_geo.to(device), ignored_map.to(device)
 			pred_score, pred_geo = model(img)
 			loss = criterion(gt_score, pred_score, gt_geo, pred_geo, ignored_map)
-			
+			print('GT Score: {}, Pred Score: {}, GT Geo: {}, Ignored Map: {}'.format(gt_score, pred_score, gt_geo, pred_geo))
 			epoch_loss += loss.item()
 			optimizer.zero_grad()
 			loss.backward()
@@ -81,6 +81,7 @@ def train(train_img_path, train_gt_path, pths_path, batch_size, lr, num_workers,
 				img, gt_score, gt_geo, ignored_map = img.to(device), gt_score.to(device), gt_geo.to(device), ignored_map.to(device)
 				pred_score, pred_geo = model(img)
 				loss = criterion(gt_score, pred_score, gt_geo, pred_geo, ignored_map)
+				print('GT Score: {}, Pred Score: {}, GT Geo: {}, Ignored Map: {}'.format(gt_score, pred_score, gt_geo, pred_geo))
 				test_loss += loss.item()
 				print('Epoch (test) is [{}/{}], mini-batch is [{}/{}], time consumption is {:.8f}, batch_loss is {:.8f}'.format(\
               epoch+1, epoch_iter, i+1, int(file_num2/batch_size), time.time()-start_time, loss.item()))
