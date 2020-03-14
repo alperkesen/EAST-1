@@ -42,14 +42,14 @@ def train(train_img_path, train_gt_path, pths_path, batch_size, lr, num_workers,
 		test_dict = checkpoint['test_loss']
 		total_epoch = checkpoint['epoch']
 		best_loss = checkpoint['best_loss']
-		best_accuracy = checkpoint['best_accuracy']
+		best_acc = checkpoint['best_acc']
 	except FileNotFoundError:
 		model.load_state_dict(torch.load('./pths/east_vgg16.pth'))
 		epoch_dict = dict()
 		test_dict = dict()
 		total_epoch = 0
 		best_loss = float('inf')
-		best_accuracy = 0
+		best_acc = 0
 
 	print("Continue from epoch {}".format(total_epoch))
 	print("Epoch_dict", epoch_dict)
