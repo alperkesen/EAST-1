@@ -43,7 +43,7 @@ def train(train_img_path, train_gt_path, pths_path, batch_size, lr, num_workers,
 		total_epoch = checkpoint['epoch']
 		best_loss = checkpoint['best_loss']
 		best_accuracy = checkpoint['best_accuracy']
-        except FileNotFoundError:
+	except FileNotFoundError:
 		model.load_state_dict(torch.load('./pths/east_vgg16.pth'))
 		epoch_dict = dict()
 		test_dict = dict()
@@ -118,7 +118,7 @@ def train(train_img_path, train_gt_path, pths_path, batch_size, lr, num_workers,
 				'test_loss': test_dict,
 				'best_loss': best_loss,
 				'best_acc': best_acc
-      }, os.path.join(pths_path, 'east_epoch_{}.pth'.format(total_epoch + epoch + 1))
+      }, os.path.join(pths_path, 'east_epoch_{}.pth'.format(total_epoch + epoch + 1)))
 
 		if test_loss / int(file_num2/batch_size) < best_loss:
 			model_state_dict = model.module.state_dict() if data_parallel else model.state_dict()
