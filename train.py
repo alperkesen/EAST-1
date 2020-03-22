@@ -79,17 +79,17 @@ def train(train_img_path, train_gt_path, pths_path, batch_size, lr, num_workers,
 		epoch_dict[total_epoch + epoch + 1] = (epoch_loss / int(file_num / batch_size), epoch_loss)
 		print('epoch_loss is {:.8f}, epoch_time is {:.8f}, epoch_loss: {}'.format(epoch_loss / int(file_num/batch_size), time.time()-epoch_time, epoch_loss))
 
-		with torch.no_grad():
-			for i, (img, gt_score, gt_geo, ignored_map) in enumerate(test_loader):
-				img, gt_score, gt_geo, ignored_map = img.to(device), gt_score.to(device), gt_geo.to(device), ignored_map.to(device)
-				pred_score, pred_geo = model(img)
-				loss = criterion(gt_score, pred_score, gt_geo, pred_geo, ignored_map)
 
-				test_loss += loss.item()
-				print('Epoch (test) is [{}/{}], mini-batch is [{}/{}], time consumption is {:.8f}, batch_loss is {:.8f}'.format(\
+		for i, (img, gt_score, gt_geo, ignored_map) in enumerate(test_loader):
+			img, gt_score, gt_geo, ignored_map = img.to(device), gt_score.to(device), gt_geo.to(device), ignored_map.to(device)
+			pred_score, pred_geo = model(img)
+			loss = criterion(gt_score, pred_score, gt_geo, pred_geo, ignored_map)
+
+			test_loss += loss.item()
+			print('Epoch (test) is [{}/{}], mini-batch is [{}/{}], time consumption is {:.8f}, batch_loss is {:.8f}'.format(\
               epoch+1, epoch_iter, i+1, int(file_num2/batch_size), time.time()-start_time, loss.item()))
 
-		test_dict[total_epoch + epoch + 1] = (test_loss / int(file_num / batch_size), test_loss)
+		test_dict[total_epoch + epoch + 1] = (test_loss / int(file_num2 / batch_size), test_loss)
 		print('test_loss is {:.8f}, epoch_time is {:.8f}, test_loss: {}'.format(test_loss / int(file_num2/batch_size), time.time()-epoch_time, test_loss))
 
 		print(time.asctime(time.localtime(time.time())))
