@@ -87,7 +87,7 @@ def evaluate_method(all_gt_boxes, all_pred_boxes):
         evaluationLog = ""
 
         pointsList = [gt_box[:-1] for gt_box in gt_boxes]
-        transcriptionList = [gt_box[-1] for gt_box in gt_boxes]
+        transcriptionsList = [gt_box[-1] for gt_box in gt_boxes]
 
         for n in range(len(pointsList)):
             points = pointsList[n]
