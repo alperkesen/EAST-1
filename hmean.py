@@ -2,8 +2,11 @@
 # -*- coding: utf-8 -*-
 import sys
 sys.path.append('.')
+import os
+import torch
 import numpy as np
 from shapely.geometry import Polygon as plg
+from model import EAST
 from detect import detect_boxes
 
 
@@ -200,9 +203,13 @@ def compute_hmean(model, device):
     test_img_path = '../ICDAR_2015/test_img/'
     test_gt_path = '../ICDAR_2015/test_gt/'
 
+    print("Predicting boxes...")
     pred_boxes = detect_boxes(model, device, test_img_path)
+
+    print("Reading GT boxes...")
     gt_boxes = read_gt_boxes(test_gt_path)
 
+    print("Evaluating Result...")
     resDict = evaluate_method(gt_boxes, pred_boxes)
 
     recall = resDict['method']['recall']
