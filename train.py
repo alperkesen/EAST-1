@@ -35,6 +35,7 @@ def train(train_img_path, train_gt_path, pths_path, batch_size, lr, num_workers,
 	optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
 	try:
+		print("(Continue) Loading east...")
 		checkpoint = torch.load('./pths/east.pth')
 		model.load_state_dict(checkpoint['model_state_dict'])
 		optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
@@ -44,6 +45,7 @@ def train(train_img_path, train_gt_path, pths_path, batch_size, lr, num_workers,
 		best_loss = checkpoint['best_loss']
 		best_acc = checkpoint['best_acc']
 	except FileNotFoundError:
+		print("(Initialize) Loading east_vgg16...")
 		model.load_state_dict(torch.load('./pths/east_vgg16.pth'))
 		epoch_dict = dict()
 		test_dict = dict()
@@ -54,7 +56,7 @@ def train(train_img_path, train_gt_path, pths_path, batch_size, lr, num_workers,
 	print("Continue from epoch {}".format(total_epoch))
 	print("Epoch_dict", epoch_dict)
 	print("Test_dict", test_dict)
-	scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[epoch_iter//2], gamma=0.1)
+	scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[300], gamma=0.1)
 
 	for epoch in range(epoch_iter):	
 		model.train()
@@ -133,10 +135,9 @@ if __name__ == '__main__':
 	train_img_path = os.path.abspath('../ICDAR_2015/train_img')
 	train_gt_path  = os.path.abspath('../ICDAR_2015/train_gt')
 	pths_path      = './pths'
-	batch_size     = 16
+	batch_size     = 8
 	lr             = 1e-3
 	num_workers    = 4
 	epoch_iter     = 2
 	save_interval  = 1
-	train(train_img_path, train_gt_path, pths_path, batch_size, lr, num_workers, epoch_iter, save_interval)	
-	
+	train(train_img_path, train_gt_path, pths_path, batch_size, lr, num_workers, epoch_iter, save_interval)
