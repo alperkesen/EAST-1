@@ -180,6 +180,26 @@ def detect_dataset(model, device, test_img_path, submit_path):
 			f.writelines(seq)
 
 
+def detect_boxes(model, device, test_img_path):
+	'''detection on whole dataset, save .txt results in submit_path
+	Input:
+		model        : detection model
+		device       : gpu if gpu is available
+		test_img_path: dataset path
+		submit_path  : submit result for evaluation
+	'''
+	img_files = os.listdir(test_img_path)
+	img_files = sorted([os.path.join(test_img_path, img_file) for img_file in img_files])
+	pred_boxes = list()
+	for i, img_file in enumerate(img_files):
+		print('evaluating {} image'.format(i), end='\r')
+		boxes = detect(Image.open(img_file), model, device)
+
+		if boxes is not None:
+			pred_boxes.append(boxes)
+        return pred_boxes
+
+
 if __name__ == '__main__':
 	img_path    = '../ICDAR_2015/test_img/test.jpg'
 	model_path  = './pths/east.pth'
