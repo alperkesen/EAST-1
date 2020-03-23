@@ -197,7 +197,8 @@ def detect_boxes(model, device, test_img_path):
 
 		if boxes is not None:
 			pred_boxes.append(boxes)
-        return pred_boxes
+
+	return pred_boxes
 
 
 if __name__ == '__main__':
